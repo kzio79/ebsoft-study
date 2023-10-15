@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.study.backend.mapper.FileMapper">
+
+    <resultMap id="FileDTOMap" type="com.study.backend.model.FileDTO">
+        <id property="fileNum" column="file_num"/>
+        <result property="saveFileName" column="save_file_name"/>
+        <result property="originalFileName" column="original_file_name"/>
+        <result property="filePath" column="file_path"/>
+        <result property="boardNum" column="board_num"/>
+    </resultMap>
+
+    <!--    파일 저장-->
+    <insert id="updateFileList">
+        INSERT INTO tb_file
+            (board_num, save_file_name, original_file_name, file_path)
+        VALUES (#{boardNum}, #{saveFileName}, #{originalFileName}, #{filePath})
+
+    </insert>
+
+    <!--    파일 불러오기-->
+    <select id="getFileList" resultType="com.study.backend.model.FileDTO" resultMap="FileDTOMap">
+        SELECT *
+        FROM tb_file
+        WHERE board_num = #{boardNum}
+    </select>
+
+    <!--    파일 카운팅-->
+    <select id="fileCount" resultType="int">
+        SELECT COUNT(*)
+        FROM tb_file
+        WHERE board_num = #{boardNum}
+    </select>
+
+    <!--   전체 파일 삭제-->
+    <delete id="deleteAllFile" parameterType="int">
+        DELETE
+        FROM tb_file
+        WHERE board_num = #{boardNum}
+    </delete>
+
+    <!--    선택 파일 삭제-->
+    <delete id="deleteSelectFile" parameterType="int">
+        DELETE
+        FROM tb_file
+        WHERE board_num = #{boardNum}
+          AND file_num = #{fileNum}
+    </delete>
+
+    <!--    파일 번호 불러오기-->
+    <select id="getFileNum" resultMap="FileDTOMap">
+        SELECT *
+        FROM tb_file
+        WHERE board_num = #{boardNum}
+          AND file_num = #{fileNum}
+    </select>
+</mapper>
