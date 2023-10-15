@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.study.mapper.BoardMapper">
+
+    <resultMap id="BoardDTOMap" type="com.study.model.BoardDTO">
+        <id property="boardNum" column="board_num"/>
+        <result property="categoryNum" column="category_num"/>
+        <result property="writeDate" column="write_date"/>
+        <result property="modifyDate" column="modify_date"/>
+        <result property="title" column="title"/>
+        <result property="writer" column="writer"/>
+        <result property="pw" column="pw"/>
+        <result property="content" column="content"/>
+        <result property="hit" column="hit"/>
+
+    </resultMap>
+
+    <!--    목록 카운팅-->
+    <select id="getBoardCount" parameterType="com.study.model.BoardDTO" resultType="int">
+        SELECT COUNT(*) FROM tb_board
+        <where>
+            <if test="searchId != null and searchId !=''">
+                AND ( title LIKE CONCAT('%', #{searchId}, '%')
+                 OR writer LIKE CONCAT('%', #{searchId}, '%'))
+            </if>
+            <if test="categoryNum != null and categoryNum > 0 ">
+                AND category_num LIKE #{categoryNum}
+            </if>
+            <if test="startDate != null">
+                <if test="endDate != null">
+                    AND write_date BETWEEN #{startDate} AND #{endDate}
+                </if>
+            </if>
+            <if test="startDate == null and endDate != null">
+                AND write_date &lt;= #{endDate}
+            </if>
+        </where>
+        ORDER BY board_num DESC
+    </select>
+
+<!--    목록 불러오기 및 검색-->
+    <select id="getBoardList" parameterType="com.study.model.BoardDTO" resultType="com.study.model.BoardDTO" resultMap="BoardDTOMap">
+        SELECT * FROM tb_board
+        <where>
+            <if test="searchId != null and searchId !=''">
+                AND ( title LIKE CONCAT('%',#{searchId},'%')
+                 OR writer LIKE CONCAT('%',#{searchId},'%'))
+            </if>
+            <if test="categoryNum != null and categoryNum > 0 ">
+                AND category_num LIKE #{categoryNum}
+            </if>
+            <if test="startDate != null">
+                <if test="endDate != null">
+                    AND write_date BETWEEN #{startDate} AND #{endDate}
+                </if>
+            </if>
+            <if test="startDate == null and endDate != null">
+                AND write_date &lt;= #{endDate}
+            </if>
+        </where>
+        ORDER BY board_num DESC LIMIT #{startPage}, #{pageSize}
+    </select>
+
+<!--    글보기-->
+    <select id="viewBoardContent" parameterType="int" resultType="com.study.model.BoardDTO" resultMap="BoardDTOMap">
+        SELECT * FROM
+                     tb_board
+                 WHERE
+                     board_num = #{boardNum}
+
+    </select>
+
+<!--    글작성-->
+    <insert id="writeBoardContent" parameterType="com.study.model.BoardDTO" useGeneratedKeys="true" keyProperty="boardNum">
+        INSERT INTO
+            tb_board
+            (category_num, title, writer, pw, content)
+        VALUES
+            (#{categoryNum}, #{title}, #{writer}, #{pw}, #{content})
+    </insert>
+
+<!--    글수정-->
+    <update id="modifyBoardContent" parameterType="com.study.model.BoardDTO">
+        UPDATE
+            tb_board
+        SET
+            writer = #{writer},
+            pw = #{pw},
+            title = #{title},
+            content = #{content},
+            modify_date=now()
+        WHERE
+            board_num = #{boardNum}
+    </update>
+
+<!--    글삭제-->
+    <delete id="deleteBoardContent" parameterType="int">
+        DELETE FROM
+                   tb_board
+               WHERE
+                   board_num = #{boardNum}
+    </delete>
+
+<!--    조회수-->
+    <update id="updateHit" parameterType="int">
+        UPDATE
+            tb_board
+        SET
+            hit = hit + 1
+        WHERE
+            board_num = #{boardNum}
+    </update>
+</mapper>
